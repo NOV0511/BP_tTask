@@ -1,0 +1,18 @@
+﻿@model PageHeaderViewModel
+<div class="jumbotron">
+    <div class="d-flex text-black-75 panel px-3 mt-3">
+        <p class="lead ml-auto my-2">
+            Welcome <img class="mx-1" src="~/img/empty_profile.png" alt="profile img" style="border-radius: 50%; max-height: 1.75rem" />
+            <strong>@Model.FirstName @Model.Surname</strong>
+        </p>
+    </div>
+    <h1 class="display-4 mt-4">@Model.PageModel.PageTitle</h1>
+    <p class="lead">@Model.PageModel.PageDescription</p>
+    <hr class="my-4">
+    <div class="d-flex flex-row align-items-center">
+        <p class="text-secondary small">Subscribe to the latest news and always have the most important information together. </p>
+        <p class="lead ml-3">
+            <a class="btn btn-outline-primary btn-md" href="#" role="button">Subscribe to news</a>
+        </p>
+    </div>
+</div>

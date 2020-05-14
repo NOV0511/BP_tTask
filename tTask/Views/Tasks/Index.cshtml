@@ -1,0 +1,906 @@
+﻿
+@{
+    ViewData["Title"] = "Tasks";
+    Layout = "_PageLayout";
+}
+@model tTask.ViewModels.TasksViewModel
+@using tTask.Extensions
+@using tTask.ORM;
+
+<script>
+    $("#sidenav-tasks").addClass("selected");
+</script>
+
+<div class="row">
+    <div class="project-wrapper pt-3">
+        <div class="col-12">
+            <div class="d-flex flex-row align-items-center">
+                <div class="px-3">
+                    <button class="btn btn-primary" onclick="AddNewTask()">+ Add task</button>
+                </div>
+                <div class="ml-auto px-3">
+                    <form asp-controller="Tasks" asp-action="Search" method="post" class="d-flex">
+                        <input class="form form-control" type="text" name="taskName" placeholder="Search tasks..." />
+                        <button class="ml-2 btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+                    </form>
+                </div>
+            </div>
+            <hr />
+        </div>
+        <div class="col">
+            <div class="wra pb-4">
+                <div class="stripe-wrapper @(!Model.UpcommingTasks.Any() ? "show" : "") p-4 d-flex">
+                    @if (!Model.UpcommingTasks.Any())
+                    {
+                        <p class="lead d-flex align-items-center my-0 mx-auto">
+                            No task here yet
+                            <button class="ml-3 btn btn-outline-primary" onclick="AddNewTask()">Assign your first task</button>
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="container-fluid">
+                            <div class="row">
+                                @foreach (var task in Model.UpcommingTasks)
+                                {
+                                    var isCurrentDay = (task.Deadline - DateTime.Now).Days == 0;
+
+                                    <div class="col-6 col-md-3 col-lg-3 col-xl-2">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex flex-row">
+                                                    <div class="mt-3 overflow-hidden w-100">
+                                                        <div class="card-header-state d-flex flex-row">
+                                                            <div class="container-fluid">
+                                                                <div class="row">
+                                                                    <div class="col pl-0">
+                                                                        <p class="task-state text-secondary mb-0">
+                                                                            @(isCurrentDay ? "Close to expire" : "Upcoming")
+                                                                        </p>
+                                                                    </div>
+                                                                    <div class="col pr-0">
+                                                                        <div class="task-priority d-flex flex-row align-items-center justify-content-end">
+                                                                            <div class="task-priority-container @task.Priority.ToLowerInvariant() d-flex align-items-center justify-content-center">
+                                                                                @if (task.Priority.ToLowerInvariant() == nameof(Priority.low))
+                                                                                {
+                                                                                    <i class="fas fa-arrow-down"></i>
+                                                                                }
+                                                                                else if (task.Priority.ToLowerInvariant() == nameof(Priority.medium))
+                                                                                {
+                                                                                    <i class="fas fa-minus"></i>
+                                                                                }
+                                                                                else if (task.Priority.ToLowerInvariant() == nameof(Priority.high))
+                                                                                {
+                                                                                    <i class="fas fa-arrow-up"></i>
+                                                                                }
+                                                                                else if (task.Priority.ToLowerInvariant() == nameof(Priority.critical))
+                                                                                {
+                                                                                    <i class="fas fa-exclamation"></i>
+                                                                                }
+
+
+                                                                            </div>
+                                                                            <span class="task-priority-state @task.Priority.ToLowerInvariant()">@task.Priority</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <h5 class="card-title task-title text-dark mt-4" data-id="@task.IdTask">@task.Name</h5>
+                                                        <p class="card-text task text-secondary">@task.Description</p>
+                                                        <div class="card-footer-task @(Model.SettingsColoring ? (!isCurrentDay ? "success" : "deadline") : "") d-flex flex-row flex-wrap justify-content-between">
+                                                            @if (!isCurrentDay)
+                                                            {
+                                                                <p class="text-success task-deadline mb-0 d-flex align-items-center">@task.Deadline.ToShortDateString()</p>
+                                                                <p class="mb-0"><small>@task.Deadline.ToString("HH:mm:ss")</small></p>
+                                                            }
+                                                            else
+                                                            {
+                                                                <p class="text-warning task-deadline mb-0 d-flex align-items-center">@task.Deadline.ToString("HH:mm:ss")</p>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="expired-task-container">
+                    <div class="section-separator d-flex align-items-center flex-row mt-4 mb-3">
+                        <hr class="my-0 w-100">
+                        <h5 class="mx-4 my-0 text-black-50 section-title">Expired tasks:</h5>
+                        <hr class="my-0 w-100">
+                    </div>
+
+                    <div class="stripe-wrapper @(!Model.ExpiredTasks.Any() ? "show" : "") px-4 py-2 d-flex">
+                        @if (!Model.ExpiredTasks.Any())
+                        {
+                            <div class="d-flex flex-column mx-auto">
+                                <p class="lead mb-1">
+                                    You have no expired task yet.
+                                </p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="container-fluid">
+                                <div class="row">
+                                    @foreach (var task in Model.ExpiredTasks)
+                                    {
+                                        var isCurrentDay = (task.Deadline - DateTime.Now).Days == 0;
+
+                                        <div class="col-6 col-md-3 col-lg-3 col-xl-2">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="d-flex flex-row">
+                                                        <div class="mt-3 overflow-hidden w-100">
+                                                            <div class="card-header-state d-flex flex-row">
+                                                                <div class="container-fluid">
+                                                                    <div class="row">
+                                                                        <div class="col pr-0">
+                                                                            <div class="task-priority d-flex flex-row align-items-center justify-content-end">
+                                                                                <div class="task-priority-container @task.Priority.ToLowerInvariant() d-flex align-items-center justify-content-center">
+                                                                                    @if (task.Priority.ToLowerInvariant() == nameof(Priority.low))
+                                                                                    {
+                                                                                        <i class="fas fa-arrow-down"></i>
+                                                                                    }
+                                                                                    else if (task.Priority.ToLowerInvariant() == nameof(Priority.medium))
+                                                                                    {
+                                                                                        <i class="fas fa-minus"></i>
+                                                                                    }
+                                                                                    else if (task.Priority.ToLowerInvariant() == nameof(Priority.high))
+                                                                                    {
+                                                                                        <i class="fas fa-arrow-up"></i>
+                                                                                    }
+                                                                                    else if (task.Priority.ToLowerInvariant() == nameof(Priority.critical))
+                                                                                    {
+                                                                                        <i class="fas fa-exclamation"></i>
+                                                                                    }
+
+
+                                                                                </div>
+                                                                                <span class="task-priority-state @task.Priority.ToLowerInvariant()">@task.Priority</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <h5 class="card-title task-title text-dark mt-4" data-id="@task.IdTask">@task.Name</h5>
+                                                            <p class="card-text task text-secondary">@task.Description</p>
+                                                            <div class="card-footer-task @(Model.SettingsColoring ? "expired" : "") d-flex flex-row flex-wrap justify-content-between">
+                                                                @if (!isCurrentDay)
+                                                                {
+                                                                    <p class="text-success task-deadline mb-0 d-flex align-items-center">@task.Deadline.ToShortDateString()</p>
+                                                                    <p class="mb-0"><small>@task.Deadline.ToString("HH:mm:ss")</small></p>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <p class="text-warning task-deadline mb-0 d-flex align-items-center">@task.Deadline.ToString("HH:mm:ss")</p>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+
+                <div class="completed-task-container">
+                    <div class="section-separator d-flex align-items-center flex-row mt-4 mb-3">
+                        <hr class="my-0 w-100">
+                        <h5 class="mx-4 my-0 text-black-50 section-title">Completed tasks:</h5>
+                        <hr class="my-0 w-100">
+                    </div>
+
+                    <div class="stripe-wrapper @(!Model.CompletedTasks.Any() ? "show" : "") px-4 py-2 d-flex">
+                        @if (!Model.CompletedTasks.Any())
+                        {
+                            <div class="d-flex flex-column mx-auto">
+                                <p class="lead mb-1">
+                                    You have no completed task yet.
+                                </p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="container-fluid">
+                                <div class="row">
+                                    @foreach (var task in Model.CompletedTasks)
+                                    {
+                                        var isCurrentDay = (task.Deadline - DateTime.Now).Days == 0;
+
+                                        <div class="col-6 col-md-3 col-lg-3 col-xl-2">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="d-flex flex-row">
+                                                        <div class="mt-3 overflow-hidden w-100">
+                                                            <div class="card-header-state d-flex flex-row">
+                                                                <div class="container-fluid">
+                                                                    <div class="row">
+                                                                        <div class="col pl-0">
+                                                                            <p class="task-state text-secondary mb-0">
+                                                                                @task.Completed
+                                                                            </p>
+                                                                        </div>
+                                                                        <div class="col pr-0">
+                                                                            <div class="task-priority d-flex flex-row align-items-center justify-content-end">
+                                                                                <div class="task-priority-container @task.Priority.ToLowerInvariant() d-flex align-items-center justify-content-center">
+                                                                                    @if (task.Priority.ToLowerInvariant() == nameof(Priority.low))
+                                                                                    {
+                                                                                        <i class="fas fa-arrow-down"></i>
+                                                                                    }
+                                                                                    else if (task.Priority.ToLowerInvariant() == nameof(Priority.medium))
+                                                                                    {
+                                                                                        <i class="fas fa-minus"></i>
+                                                                                    }
+                                                                                    else if (task.Priority.ToLowerInvariant() == nameof(Priority.high))
+                                                                                    {
+                                                                                        <i class="fas fa-arrow-up"></i>
+                                                                                    }
+                                                                                    else if (task.Priority.ToLowerInvariant() == nameof(Priority.critical))
+                                                                                    {
+                                                                                        <i class="fas fa-exclamation"></i>
+                                                                                    }
+
+                                                                                </div>
+                                                                                <span class="task-priority-state @task.Priority.ToLowerInvariant()">@task.Priority</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <h5 class="card-title task-title text-dark mt-4" data-id="@task.IdTask">@task.Name</h5>
+                                                            <p class="card-text task text-secondary">@task.Description</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="tasks-sidebar d-flex flex-column">
+    <div class="tasks-detail">
+        <div class="card-header">
+            <div class="task-detail-close d-flex mb-2" style="color:gray">
+                <i class="fas fa-times ml-auto p-1" onclick="CloseTaskDetail()" style="cursor: pointer;"></i>
+            </div>
+            <div class="task-detail-top flex">
+                <div id="task-state"></div>
+                <div id="task-created" class="ml-auto"></div>
+            </div>
+
+        </div>
+        <div class="content-wrapper pl-4 pr-3">
+
+            <div id="task-detail-btns" class="task-detail-btns flex my-3 justify-content-end">
+            </div>
+
+            <div id="task-name" class="mt-4 mb-2">
+                <p class="display-5 text-primary mb-2"></p>
+            </div>
+
+            <div id="task-description" class="mb-5">
+                <p class="text-black-50" style="font-size: 1.15rem"></p>
+            </div>
+
+
+            <p class="lead">Informations:</p>
+            <div class="container-fluid p-0">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="title-wrapper mb-2">
+                            <i class="fas fa-arrow-up"></i>
+                            <p class="mb-0 ml-2">Priority:</p>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div id="task-priority" class="ml-1"></div>
+                    </div>
+                    <div class="col-4">
+                        <div class="title-wrapper mb-2">
+                            <i class="far fa-calendar"></i>
+                            <p class="mb-0 ml-2">Deadline:</p>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div id="task-deadline" class="ml-1"></div>
+                    </div>
+                    <div class="col-4">
+                        <div class="title-wrapper mb-2">
+                            <i class="far fa-user"></i>
+                            <p class="mb-0 ml-2">Requester:</p>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div id="task-appliciant-name" class="ml-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="task-detail-assigned mt-4">
+                <div class="lead mb-3">Assigned to:</div>
+                <div id="task-assigned-to"></div>
+            </div>
+
+            <div class="task-detail-comments" style="margin-top: 5rem;">
+                <div class="task-comments-header"><i class="far fa-comment"></i> Comments <span id="task-comment-counter" class="counter"></span> </div>
+                <div id="task-comments"></div>
+            </div>
+        </div>
+        @*<div class="task-detail-close d-flex mb-3">
+                <i class="fas fa-times ml-auto" onclick="CloseTaskDetail()"></i>
+            </div>
+
+            <div class="task-detail-top flex">
+                <div id="task-state"></div>
+                <div id="task-created" class="ml-auto"></div>
+            </div>*@
+
+
+    </div>
+    <div class="tasks-detail-comment mt-auto">
+        <div class="tasks-new-comment flex flex-row align-items-center">
+            <textarea id="comment-text" placeholder="Enter comment..."></textarea>
+            <div id="submit-new-comment"><i class="fas fa-paper-plane"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-update-task dialog" id="dialog-update-task">
+     <div class="dialogbox-new-task dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Modify task</h3>
+            <i class="fas fa-times ml-auto mb-auto" onclick="CloseDialogUpdateTask()"></i>
+        </div>
+        <hr class="my-3" />
+
+         <form asp-controller="Tasks" asp-action="UpdateTask" method="post">
+             <div class="form-group">
+                 <label for="taskName">Task name<span class="text-danger">*</span> :</label>
+                 <input class="form-control" asp-for="TaskForm.Name" type="text" id="update-task-name" required />
+             </div>
+
+             <div class="form-group">
+                 <label for="taskDescription">Description<span class="text-danger">*</span> :</label>
+                 <textarea class="form-control" asp-for="TaskForm.Description" id="update-task-description" required></textarea>
+             </div>
+
+             @if (Model.IdService == (int)Services.Basic)
+             {
+                 <input id="update-task-priority" asp-for="TaskForm.Priority" type="hidden" value="low" />
+             }
+             else
+             {
+                 <div class="form-group">
+                     <label for="prioriy">Priority:</label>
+                     <select class="form-control" id="update-task-choose-priority" asp-for="TaskForm.Priority" asp-items="@Model.Priority" required></select>
+                 </div>
+             }
+             <div class="form-group">
+                 <label for="taskDeadline">Deadline<span class="text-danger">*</span> :</label>
+                 <input class="form-control" id="update-task-deadline" asp-for="TaskForm.Deadline" type="datetime-local" required />
+             </div>
+             <div class="form-group">
+                 <label for="idAssignTo">Assign to<span class="text-danger">*</span> :</label>
+                 <select class="form-control" id="update-task-assign" asp-for="TaskForm.AssignedTo" multiple size="3" required>
+                 </select>
+             </div>
+
+             <input asp-for="TaskForm.IdTask" type="hidden" id="update-task-idTask" />
+             <input asp-for="TaskForm.From" type="hidden" value="task" />
+             <button class="btn btn-primary d-flex ml-auto" type="submit">Update</button>
+         </form>
+    </div>
+</div>
+
+<div class="dialog-new-task dialog" id="dialog-new-task">
+    <div class="dialogbox-new-task dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Add new task</h3>
+            <i class="fas fa-times ml-auto mb-auto" onclick="CloseDialogNewTask()"></i>
+        </div>
+        <hr class="my-3" />
+
+        <form asp-controller="Tasks" asp-action="AddNewTask" method="post">
+            <div class="form-group">
+                <select class="form-control" id="choose-project" name="project" asp-items="@Model.UsersProjects" required>
+                    <option value="">Choose project</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="TaskForm.Name">Task name<span class="text-danger">*</span> :</label>
+                <input class="form-control" asp-for="TaskForm.Name" type="text" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="taskDescription">Description<span class="text-danger">*</span> :</label>
+                <textarea class="form-control" asp-for="TaskForm.Description" required></textarea>
+            </div>
+
+            @if (Model.IdService == (int)Services.Basic)
+            {
+                <input id="dialog-priority" asp-for="TaskForm.Priority" type="hidden" value="low" />
+            }
+            else
+            {
+                <div class="form-group">
+                    <label for="TaskForm.Prioriy">Priority:</label>
+                    <select class="form-control" id="choose-priority" asp-for="TaskForm.Priority" asp-items="@Model.Priority" required></select>
+                </div>
+            }
+
+            <div class="form-group">
+                <label for="TaskForm.Deadline">Deadline<span class="text-danger">*</span> :</label>
+                <input class="form-control" id="dialog-task-deadline" asp-for="TaskForm.Deadline" type="datetime-local" required />
+            </div>
+
+            <div class="form-group">
+                <label for="idAssignTo">Assign to<span class="text-danger">*</span> :</label>
+                <select class="form-control" id="dialog-assign" asp-for="TaskForm.AssignedTo" multiple size="3" required>
+                </select>
+            </div>
+
+            <input id="dialog-id-project" asp-for="TaskForm.IdProject" type="hidden" value="" />
+            <input asp-for="TaskForm.From" type="hidden" value="task" />
+            <button class="btn btn-primary d-flex ml-auto" type="submit">Add</button>
+        </form>
+    </div>
+</div>
+
+<div class="dialog-alert dialog" id="dialog-alert">
+    <div class="dialogbox-alert dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Alert</h3>
+        </div>
+        <hr class="my-3" />
+        <div id="alert-text"></div>
+        <button class="btn btn-primary d-flex ml-auto" type="submit" onclick="CloseDialogAlert()">OK</button>
+    </div>
+</div>
+
+
+<div class="dialog-delete-task dialog" id="dialog-delete-task">
+    <div class="dialogbox-alert dialogbox p-4">
+        <h3>Alert</h3>
+        <div id="alert-text">Do you really want to delete this task?</div>
+        <div class="flex dialog-delete-project-btns">
+            <form asp-action="DeleteTask" asp-controller="Tasks" method="post">
+                <input type="hidden" id="delete-task-id" name="idTask" />
+                <div class="button-group d-flex flex-row mt-4">
+                    <button type="button" onclick="CloseDialogDeleteTask()" class="btn btn-outline-secondary mr-0">Cancel</button>
+                    <button id="delete-project-btn" type="submit" class="btn btn-primary ml-1">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@*<div class="tasks-main" id="tasks-main">
+        <div class="tasks-top-bar flex">
+            <div class="task-add-task"><i class="fas fa-plus" onclick="AddNewTask()"></i></div>
+            <h1>My tasks</h1>
+            <div class="tasks-search">
+                <form asp-controller="Tasks" asp-action="Search" method="get">
+                    <input type="text" name="taskName" placeholder="Search tasks..." />
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+
+        </div>
+        <div class="tasks-list">
+            @if (Model.TasksExpired.Count != 0)
+            {
+                <div class="tasks-list-header">
+                    Expired tasks <span class="counter">(@Model.TasksExpired.Count)</span>
+                </div>
+                <div class="tasks-sublist">
+                    @foreach (var task in Model.TasksExpired)
+                    {
+                        <div class="tasks-sublist-item @task.Priority" data-id="@task.IdTask">
+                            <div class="tasks-sublist-name">@task.Name</div>
+                            <div class="tasks-sublist-project">@task.IdProjectNavigation.Name</div>
+                            <div class="tasks-sublist-deadline"><i class="far fa-calendar"></i> @task.Deadline</div>
+                            <div class="tasks-sublist-imgs">
+                                @{
+                                    var counter = 1;
+                                    var plus = 0;
+                                    var title = string.Empty;
+                                }
+                                @foreach (var user in task.UserTask)
+                                {
+                                    @if (task.UserTask.Count > 3 && counter > 2)
+                                    {
+                                        plus++;
+                                        title += user.IdUserNavigation.FirstName + ' ' + user.IdUserNavigation.Surname + '\n';
+                                    }
+                                    else if (string.IsNullOrEmpty(user.IdUserNavigation.Photopath))
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="~/img/empty_profile.png" />
+                                    }
+                                    else
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="@user.IdUserNavigation.Photopath" />
+                                    }
+                                    counter++;
+                                }
+                                @if (task.UserTask.Count > 3)
+                                {
+                                    <span class="tasks-more-users" title="@title">+@plus</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            @if (Model.TasksToday.Count != 0)
+            {
+                <div class="tasks-list-header">
+                    Expires today <span class="counter">(@Model.TasksToday.Count)</span>
+                </div>
+                <div class="tasks-sublist">
+                    @foreach (var task in Model.TasksToday)
+                    {
+                        <div class="tasks-sublist-item @task.Priority" data-id="@task.IdTask">
+                            <div class="tasks-sublist-name">@task.Name</div>
+                            <div class="tasks-sublist-project">@task.IdProjectNavigation.Name</div>
+                            <div class="tasks-sublist-deadline"><i class="far fa-calendar"></i> @task.Deadline</div>
+                            <div class="tasks-sublist-imgs">
+                                @{
+                                    var counter = 1;
+                                    var plus = 0;
+                                    var title = string.Empty;
+                                }
+                                @foreach (var user in task.UserTask)
+                                {
+                                    @if (task.UserTask.Count > 3 && counter > 2)
+                                    {
+                                        plus++;
+                                        title += user.IdUserNavigation.FirstName + ' ' + user.IdUserNavigation.Surname + '\n';
+                                    }
+                                    else if (string.IsNullOrEmpty(user.IdUserNavigation.Photopath))
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="~/img/empty_profile.png" />
+                                    }
+                                    else
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="@user.IdUserNavigation.Photopath" />
+                                    }
+                                    counter++;
+                                }
+                                @if (task.UserTask.Count > 3)
+                                {
+                                    <span class="tasks-more-users" title="@title">+@plus</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            @if (Model.TasksWeek.Count != 0)
+            {
+                <div class="tasks-list-header">
+                    Next 7 days <span class="counter">(@Model.TasksWeek.Count)</span>
+                </div>
+                <div class="tasks-sublist">
+                    @foreach (var task in Model.TasksWeek)
+                    {
+                        <div class="tasks-sublist-item @task.Priority" data-id="@task.IdTask">
+                            <div class="tasks-sublist-name">@task.Name</div>
+                            <div class="tasks-sublist-project">@task.IdProjectNavigation.Name</div>
+                            <div class="tasks-sublist-deadline"><i class="far fa-calendar"></i> @task.Deadline</div>
+                            <div class="tasks-sublist-imgs">
+                                @{
+                                    var counter = 1;
+                                    var plus = 0;
+                                    var title = string.Empty;
+                                }
+                                @foreach (var user in task.UserTask)
+                                {
+                                    @if (task.UserTask.Count > 3 && counter > 2)
+                                    {
+                                        plus++;
+                                        title += user.IdUserNavigation.FirstName + ' ' + user.IdUserNavigation.Surname + '\n';
+                                    }
+                                    else if (string.IsNullOrEmpty(user.IdUserNavigation.Photopath))
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="~/img/empty_profile.png" />
+                                    }
+                                    else
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="@user.IdUserNavigation.Photopath" />
+                                    }
+                                    counter++;
+                                }
+                                @if (task.UserTask.Count > 3)
+                                {
+                                    <span class="tasks-more-users" title="@title">+@plus</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            @if (Model.TasksMonth.Count != 0)
+            {
+                <div class="tasks-list-header">
+                    Next 30 days <span class="counter">(@Model.TasksMonth.Count)</span>
+                </div>
+                <div class="tasks-sublist">
+                    @foreach (var task in Model.TasksMonth)
+                    {
+                        <div data-id="@task.IdTask" class="tasks-sublist-item @task.Priority">
+                            <div class="tasks-sublist-name">@task.Name</div>
+                            <div class="tasks-sublist-project">@task.IdProjectNavigation.Name</div>
+                            <div class="tasks-sublist-deadline"><i class="far fa-calendar"></i> @task.Deadline</div>
+                            <div class="tasks-sublist-imgs">
+                                @{
+                                    var counter = 1;
+                                    var plus = 0;
+                                    var title = string.Empty;
+                                }
+                                @foreach (var user in task.UserTask)
+                                {
+                                    @if (task.UserTask.Count > 3 && counter > 2)
+                                    {
+                                        plus++;
+                                        title += user.IdUserNavigation.FirstName + ' ' + user.IdUserNavigation.Surname + '\n';
+                                    }
+                                    else if (string.IsNullOrEmpty(user.IdUserNavigation.Photopath))
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="~/img/empty_profile.png" />
+                                    }
+                                    else
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="@user.IdUserNavigation.Photopath" />
+                                    }
+                                    counter++;
+                                }
+                                @if (task.UserTask.Count > 3)
+                                {
+                                    <span class="tasks-more-users" title="@title">+@plus</span>
+                                }
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            @if (Model.TasksOther.Count != 0)
+            {
+                <div class="tasks-list-header">
+                    Other tasks <span class="counter">(@Model.TasksOther.Count)</span>
+                </div>
+                <div class="tasks-sublist">
+                    @foreach (var task in Model.TasksOther)
+                    {
+                        <div class="tasks-sublist-item @task.Priority" data-id="@task.IdTask">
+                            <div class="tasks-sublist-name">@task.Name</div>
+                            <div class="tasks-sublist-project">@task.IdProjectNavigation.Name</div>
+                            <div class="tasks-sublist-deadline"><i class="far fa-calendar"></i> @task.Deadline</div>
+                            <div class="tasks-sublist-imgs">
+                                @{
+                                    var counter = 1;
+                                    var plus = 0;
+                                    var title = string.Empty;
+                                }
+                                @foreach (var user in task.UserTask)
+                                {
+                                    @if (task.UserTask.Count > 3 && counter > 2)
+                                    {
+                                        plus++;
+                                        title += user.IdUserNavigation.FirstName + ' ' + user.IdUserNavigation.Surname + '\n';
+                                    }
+                                    else if (string.IsNullOrEmpty(user.IdUserNavigation.Photopath))
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="~/img/empty_profile.png" />
+                                    }
+                                    else
+                                    {
+                                        <img title="@user.IdUserNavigation.FirstName @user.IdUserNavigation.Surname" src="@user.IdUserNavigation.Photopath" />
+                                    }
+                                    counter++;
+                                }
+                                @if (task.UserTask.Count > 3)
+                                {
+                                    <span class="tasks-more-users" title="@title">+@plus</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+    </div>
+    <div class="tasks-sidebar">
+        <div class="tasks-detail">
+            <div class="task-detail-close"><i class="fas fa-times" onclick="CloseTaskDetail()"></i></div>
+
+
+            <div class="task-detail-top flex">
+                <div id="task-state"></div>
+                <div id="task-created"></div>
+            </div>
+
+            <div class="task-detail-btns flex" id="task-detail-btns"> </div>
+
+            <div id="task-name"></div>
+
+            <div id="task-description"></div>
+
+            <div class="task-detail-middle flex">
+                <div class="task-detail-middle-date flex">
+                    <div><i class="far fa-calendar"></i></div>
+                    <div>
+                        <div class="task-detail-subheading">Deadline:</div>
+                        <div id="task-deadline"></div>
+                    </div>
+                </div>
+                <div class="task-detail-middle-appliciant flex">
+                    <div id="task-appliciant-img"></div>
+                    <div>
+                        <div class="task-detail-subheading">Requester:</div>
+                        <div id="task-appliciant-name"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="task-detail-priority">
+                <div>Priority:</div>
+                <div id="task-priority"></div>
+            </div>
+
+            <div class="task-detail-assigned">
+                <div>Assigned to:</div>
+                <div id="task-assigned-to"></div>
+            </div>
+
+            <div class="task-detail-comments">
+                <div class="task-comments-header"><i class="far fa-comment"></i> Comments <span id="task-comment-counter" class="counter"></span> </div>
+                <div id="task-comments"></div>
+            </div>
+
+        </div>
+        <div class="tasks-detail-comment">
+            <div class="tasks-new-comment flex">
+                <textarea id="comment-text" placeholder="Enter comment..."></textarea>
+                <div id="submit-new-comment"><i class="fas fa-paper-plane"></i></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="dialog-new-task dialog" id="dialog-new-task">
+        <div class="dialogbox-new-task dialogbox">
+            <div class="dialog-close"><i class="fas fa-times" onclick="CloseDialogNewTask()"></i></div>
+            <h3>Add new task</h3>
+            <form asp-controller="Tasks" asp-action="AddNewTask" method="post">
+                <select id="choose-project" name="project" asp-items="@Model.UsersProjects" required>
+                    <option value="">Choose project</option>
+                </select>
+
+                <label for="taskName">Task name:</label>
+                <input name="taskName" type="text" required />
+
+                <label for="taskDescription">Description:</label>
+                <textarea name="taskDescription" required></textarea>
+
+                @if (Model.IdService == (int)Services.Basic)
+                {
+                    <input id="dialog-priority" name="priority" type="hidden" value="low" />
+                }
+                else
+                {
+                    <label for="prioriy">Priority:</label>
+                    <select id="choose-priority" name="priority" asp-items="@Model.Priority" required></select>
+                }
+
+                <label for="taskDeadline">Deadline:</label>
+                <input id="dialog-task-deadline" name="taskDeadline" type="datetime-local" required />
+
+                <label for="idAssignTo">Assign to:</label>
+                <select id="dialog-assign" name="idAssignTo" multiple size="3" required>
+                </select>
+
+                <input id="dialog-id-project" name="idProject" type="hidden" value="" />
+                <input name="from" type="hidden" value="task" />
+                <br /><button type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="dialog-alert dialog" id="dialog-alert">
+        <div class="dialogbox-alert dialogbox">
+            <h3>Alert</h3>
+            <div id="alert-text"></div>
+            <button type="submit" onclick="CloseDialogAlert()">OK</button>
+        </div>
+    </div>
+
+
+    <div class="dialog-delete-task dialog" id="dialog-delete-task">
+        <div class="dialogbox-alert dialogbox">
+            <h3>Alert</h3>
+            <div id="alert-text">Do you really want to delete this task?</div>
+            <div class="flex dialog-delete-project-btns">
+                <form asp-action="DeleteTask" asp-controller="Tasks" method="post">
+                    <input type="hidden" name="idTask" id="delete-task-id" />
+                    <button id="delete-task-btn" type="submit">Delete</button>
+                </form>
+                <button type="submit" onclick="CloseDialogDeleteTask()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="dialog-update-task dialog" id="dialog-update-task">
+        <div class="dialogbox-new-task dialogbox">
+            <div class="dialog-close"><i class="fas fa-times" onclick="CloseDialogUpdateTask()"></i></div>
+            <h3>Add new task</h3>
+            <form asp-controller="Tasks" asp-action="UpdateTask" method="post">
+                <label for="taskName">Task name:</label>
+                <input name="taskName" type="text" id="update-task-name" required />
+
+                <label for="taskDescription">Description:</label>
+                <textarea name="taskDescription" id="update-task-description" required></textarea>
+
+                @if (Model.IdService == (int)Services.Basic)
+                {
+                    <input id="update-task-priority" name="priority" type="hidden" value="low" />
+                }
+                else
+                {
+                    <label for="prioriy">Priority:</label>
+                    <select id="update-task-choose-priority" name="priority" asp-items="@Model.Priority" required></select>
+                }
+
+                <label for="taskDeadline">Deadline:</label>
+                <input id="update-task-deadline" name="taskDeadline" type="datetime-local" required />
+
+                <label for="idAssignTo">Assign to:</label>
+                <select id="update-task-assign" name="idAssignTo" multiple size="3" required>
+                </select>
+
+                <input name="idTask" type="hidden" id="update-task-idTask" />
+                <input name="from" type="hidden" value="project" />
+                <br /><button type="submit">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+       @if (Model.IdService != (int)Services.Basic && Model.SettingsColoring)
+       {
+           <text>
+                $(".medium").each(function () { $(this).css("background-color", "#ff09"); });
+                $(".high").each(function () { $(this).css("background-color", "#fa09"); });
+                $(".critical").each(function () { $(this).css("background-color", "#f009"); });
+                $(".tasks-sublist-deadline").each(function () { $(this).css("color", "#424242"); });
+            </text>
+        }
+    </script>*@

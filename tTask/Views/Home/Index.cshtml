@@ -1,0 +1,114 @@
+﻿@{
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+
+}
+@model tTask.ViewModels.IndexViewModel
+@Html.ValidationSummary(true)
+
+
+<div class="top-buttons my-2">
+    <div class="sign-in active" id="sign-in">
+        Sign in
+    </div>
+    <div class="vertical-line"></div>
+    <div class="sign-up" id="sign-up">
+        Sign up
+    </div>
+</div>
+
+<span class="text-danger customErr">@Html.ValidationMessage("CustomErr")</span>
+
+<div class="container">
+    <div class="row">
+        <div class="col-10 offset-1">
+            <div id="sign-in-form" class="sign-form selected mt-4">
+                <form asp-action="SignIn" asp-controller="Home" method="post">
+                    <div class="form-group">
+                        <label asp-for="SignIn.Email" class="control-label"><small class="font-weight-bold">E-mail<span class="text-danger">*</span> :</small></label>
+                        <input asp-for="SignIn.Email" class="form-control" type="email" placeholder="Type your e-mail...">
+                        <span asp-validation-for="SignIn.Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="SignIn.Password" class="control-label"><small class="font-weight-bold">Password<span class="text-danger">*</span> :</small></label>
+                        <input asp-for="SignIn.Password" class="form-control" type="password" placeholder="Type your password...">
+                        <span asp-validation-for="SignIn.Password" class="text-danger"></span>
+                    </div>
+                    <div class="d-flex">
+                        <button type="submit" class="ml-auto mb-3 py-2 px-3 form-login btn btn-primary">Sign in</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-10 offset-1">
+            <div id="sign-up-form" class="sign-form mt-4">
+                <form asp-action="SignUp" asp-controller="Home" method="post">
+                    @if (@Model.Domain == "default")
+                    {
+                        <div class="form-group">
+                            <label asp-for="SignUp.TenantName" class="control-label"><small class="font-weight-bold">Company name<span class="text-danger">*</span> :</small></label>
+                            <input asp-for="SignUp.TenantName" class="form-control" type="text" placeholder="Type company name...">
+                            <span asp-validation-for="SignUp.TenantName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="SignUp.TenantDomain" class="control-label"><small class="font-weight-bold">Domain<span class="text-danger">*</span> :</small></label>
+                            <input asp-for="SignUp.TenantDomain" class="form-control" type="text" placeholder="Type application domain...">
+                            <span asp-validation-for="SignUp.TenantDomain" class="text-danger"></span>
+                        </div>
+                    }
+                <div class="form-group">
+                    <label asp-for="SignUp.Email" class="control-label"><small class="font-weight-bold">Email<span class="text-danger">*</span> :</small></label>
+                    <input asp-for="SignUp.Email" class="form-control" type="email" placeholder="Type your e-mail...">
+                    <span asp-validation-for="SignUp.Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SignUp.FirstName" class="control-label"><small class="font-weight-bold">Name<span class="text-danger">*</span> :</small></label>
+                    <input asp-for="SignUp.FirstName" class="form-control" type="text" placeholder="Type your first name...">
+                    <span asp-validation-for="SignUp.FirstName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SignUp.Surname" class="control-label"><small class="font-weight-bold">Surname<span class="text-danger">*</span> :</small></label>
+                    <input asp-for="SignUp.Surname" class="form-control" type="text" placeholder="Type your surname...">
+                    <span asp-validation-for="SignUp.Surname" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SignUp.PhoneNumber" class="control-label"><small class="font-weight-bold">Phone number<span class="text-danger">*</span> :</small></label>
+                    <input asp-for="SignUp.PhoneNumber" class="form-control" type="text" placeholder="Type your phone number...">
+                    <span asp-validation-for="SignUp.PhoneNumber" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SignUp.Password" class="control-label"><small class="font-weight-bold">Password<span class="text-danger">*</span> :</small></label>
+                    <input asp-for="SignUp.Password" class="form-control" type="password" placeholder="Type your password...">
+                    <span asp-validation-for="SignUp.Password" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SignUp.ConfirmPassword" class="control-label"><small class="font-weight-bold">Confirm password<span class="text-danger">*</span> :</small></label>
+                    <input asp-for="SignUp.ConfirmPassword" class="form-control" type="password" placeholder="Confirm your password...">
+                    <span asp-validation-for="SignUp.ConfirmPassword" class="text-danger"></span>
+                </div>
+
+
+                    <div class="d-flex">
+                        <button type="submit" class="ml-auto mb-3 py-2 px-3 form-login btn btn-primary">Sign up</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@if (Model.SignUpSelected)
+{
+    <script>
+        $("#sign-up").addClass("active");
+        $("#sign-in").removeClass("active");
+        $("#sign-up-form").addClass("selected");
+        $("#sign-in-form").removeClass("selected");
+    </script>
+}
+

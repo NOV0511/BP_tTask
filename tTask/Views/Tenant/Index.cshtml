@@ -1,0 +1,146 @@
+﻿@{
+    ViewData["Title"] = "Tenant management";
+    Layout = "_PageLayout";
+    ViewData["LayoutSidebar"] = 25;
+}
+@model tTask.ViewModels.TenantViewModel
+@using tTask.ORM.DTO;
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+
+<script>
+    $("#sidenav-tenant").addClass("selected");
+</script>
+
+
+<div class="row">
+    <div class="project-wrapper pt-3">
+        <div class="col-12">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex flex-row align-items-center">
+                        <p class="display-6 p-3 my-0">Managers:</p>
+                        <div class="px-3 ml-auto">
+                            <button class="btn btn-primary" onclick="AddUserToProject()">+ Promote to manager</button>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="stripe-wrapper @(!Model.Managers.Any() ? "show" : "") p-4 d-flex">
+                        @if (!Model.Managers.Any())
+                        {
+                            <p class="lead d-flex align-items-center my-0 mx-auto">
+                                No manager has been promoted yet.
+                                <button class="ml-3 btn btn-outline-primary" onclick="AddUserToProject()">Promote an user to manager</button>
+                            </p>
+                        }
+                        else
+                        {
+                            @foreach (var manager in Model.Managers)
+                            {
+                                <div class="col-6 col-md-3 col-lg-3 col-xl-2">
+                                    <div class="card card--manager">
+                                        <div class="card-body d-flex flex-column justify-content-center align-items-center flex-column">
+                                            <div class="img-container mt-3">
+                                                @if (string.IsNullOrEmpty(manager.Photopath))
+                                                {
+                                                    <img class="img-fluid rounded-circle card-image-user--manager" src="~/img/empty_profile.png" />
+                                                }
+                                                else
+                                                {
+                                                    <img class="img-fluid rounded-circle card-image-user--manager" src="@manager.Photopath" />
+                                                }
+                                            </div>
+                                            <h5 class="card-title task-title text-dark mt-3 mb-0" data-id="@manager.Id">@manager.FirstName @manager.Surname</h5>
+                                            <p class="card-text task text-secondary mt-1">@manager.Email</p>
+                                            <button class="btn btn-outline-danger d-flex flex-row align-items-center" onclick="DemoteUser(@manager.Id)">
+                                                Demote
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex flex-row align-items-center mt-4">
+                        <p class="display-6 p-3 my-0">Users:</p>
+                    </div>
+                    <hr />
+                    <div class="mt-3 p-5">
+                        <div class="row">
+                            @foreach (var user in Model.AllUsers)
+                            {
+                                <div class="col-6 col-md-3 col-lg-3 col-xl-2">
+                                    <div class="card card--no-border mb-3">
+                                        <div class="card-body d-flex flex-row justify-content-center align-items-center flex-column">
+                                            <div class="img-container position-relative mt-3">
+                                                @if (string.IsNullOrEmpty(user.Photopath))
+                                                {
+                                                    <img class="img-fluid rounded-circle card-image-user" src="~/img/empty_profile.png" />
+                                                }
+                                                else
+                                                {
+                                                    <img class="img-fluid rounded-circle card-image-user" src="@user.Photopath" />
+                                                }
+                                            </div>
+                                            <h5 class="card-title task-title text-dark mt-3 mb-0" data-id="@user.Id">@user.FirstName @user.Surname</h5>
+                                            <p class="card-text task text-secondary mt-1">@user.Email</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="project-sidebar position-fixed">
+    <div class="project-siderbar-container">
+        <div class="project-siderbar-header p-4 mt-3">
+            <p class="display-5 mb-4 text-primary">Projects</p>
+            <p class="text-secondary">Always have an overview of the project at hand. Manage your projects.</p>
+        </div>
+
+        <div class="project-list px-4 pb-4">
+            @foreach (var project in Model.AllProject)
+            {
+               
+                <div class="project-detail">
+                    <a asp-controller="Project" asp-action="Index" asp-route-idProject="@project.IdProject" class="project-link text-primary">
+                        <p class="lead lead-bolder mb-1">@project.Name</p>
+                    </a>
+                    <p class="text-secondary">@project.Description</p>
+                    <div class="project-info d-flex flex-row text-secondary">
+                        <p><i class="fas fa-project-diagram" title="Number of tasks"></i> @project.Task.Count</p>
+                        <p class="ml-3"><i class="fas fa-users" title="Number of users"></i> @project.UserProject.Count</p>
+                    </div>
+                </div>
+                <hr />
+
+            }
+        </div>
+
+    </div>
+</div>
+
+
+<div class="dialog-add-user dialog" id="dialog-add-user">
+    <div class="dialogbox-add-user dialogbox p-3">
+        <div class="dialog-close d-flex">
+            <i class="fas fa-times ml-auto mb-auto" onclick="CloseDialogAddUser()"></i>
+        </div>
+        <h4>Promote user to manager</h4>
+        <form asp-controller="Tenant" asp-action="PromoteUser" method="post" class="my-2">
+            <select class="custom-select my-3" name="idUser" asp-items="@Model.UsersNotManager" required>
+                <option value="">Please select one</option>
+            </select>
+            <br />
+            <button class="btn btn-primary d-flex ml-auto" type="submit">Promote</button>
+        </form>
+    </div>
+</div>
+

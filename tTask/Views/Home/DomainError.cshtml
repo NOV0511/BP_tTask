@@ -1,0 +1,14 @@
+﻿@{
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+    ViewData["Title"] = "DomainError";
+}
+
+    <div class="msg-box">
+        <h1>DomainError</h1>
+        <p>This domain does not exists. Please check your URL.</p>
+        <p>You can create your own instance of our application</p>
+        <form asp-action="DomainErrorPost" asp-controller="Home" method="post">
+            <button type="submit">HERE</button>
+        </form>
+    </div>
+

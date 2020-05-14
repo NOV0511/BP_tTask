@@ -1,0 +1,48 @@
+﻿
+@{
+    ViewData["Title"] = "People";
+    Layout = "_PageLayout";
+}
+@model tTask.ViewModels.PeopleViewModel
+
+<script>
+    $("#sidenav-people").addClass("selected");
+</script>
+
+<div class="row">
+    <div class="project-wrapper pt-3">
+        <div class="col-12">
+            <div class="row">
+                @foreach (var project in Model.Projects)
+                {
+                    <div class="col-3">
+                        <div class="project-container p-3 my-3">
+                            <p class="display-6">@project.ProjectName (@project.ProjectUsers.Count)</p>
+                            <p class="lead text-secondary">Users in project:</p>
+                            <div class="users">
+                                @foreach (var user in project.ProjectUsers)
+                                {
+                                    <button class="btn-people" data-toggle="popover" title="@user.FirstName @user.Surname."
+                                            data-content="Email: @user.Email. Phone: @user.PhoneNumber ">
+                                        <div class="img-container">
+                                            @if (string.IsNullOrEmpty(user.Photopath))
+                                            {
+                                                <img class="img-fluid" src="~/img/empty_profile.png" />
+                                            }
+                                            else
+                                            {
+                                                <img class="img-fluid" src="@user.Photopath" />
+                                            }
+                                        </div>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+           

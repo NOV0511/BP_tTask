@@ -1,0 +1,114 @@
+﻿
+@using tTask.Extensions
+@using tTask.ORM;
+@{
+    var sideBar = ViewData.ContainsKey("LayoutSidebar");
+    
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - tTask</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="~/lib/jquery-datetimepicker/jquery.datetimepicker.css" />
+
+</head>
+<body>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-datetimepicker/jquery.datetimepicker.js"></script>
+
+    <header>
+        <nav>
+            <div class="sidenav">
+                <div class="upper">
+                    <ul class="list-unstyled">
+                        <li class="mb-5">
+                            <a href="#">
+                               @await  Component.InvokeAsync("ProfileImage")
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="HomePage" asp-action="Index" id="sidenav-home" class="@Html.IsActive(actions: "Index", controllers: "HomePage")"><img src="~/img/menu-icons/home.png" alt="home-icon" /></a>
+                        </li>
+                        <li>
+                            <a asp-controller="Tasks" asp-action="Index" id="sidenav-tasks" class="@Html.IsActive(actions: "Index", controllers: "Tasks")"><img src="~/img/menu-icons/task.png" alt="task-icon" /></a>
+                        </li>
+                        <li>
+                            <a asp-controller="People" asp-action="Index" id="sidenav-people" class="@Html.IsActive(actions: "Index", controllers: "People")"><img src="~/img/menu-icons/team.png" alt="team-icon" /></a>
+                        </li>
+
+                        @if (User.IsInRole(nameof(Roles.DomainAdmin)))
+                        {
+                            <li>
+                                <a asp-controller="Tenant" asp-action="Index" id="sidenav-tenant" class="@Html.IsActive(actions: "Index", controllers: "Tenant")"><img src="~/img/menu-icons/dashboard.png" alt="dashboard-icon" /></a>
+                            </li>
+                            @*<li>
+                                <a asp-controller="Service" asp-action="Index" id="sidenav-service" class="@Html.IsActive(actions: "Index", controllers: "Service")"><img src="~/img/menu-icons/payment.png" alt="payment-icon" /></a>
+                            </li>*@
+
+                        }
+                    </ul>
+
+                </div>
+                <div class="lower w-100">
+                    <ul class="list-unstyled mb-0">
+                        <li>
+                            <a asp-controller="Notification" asp-action="Index" id="sidenav-notifications">
+                                <img src="~/img/menu-icons/bell.png" alt="profile-icon" />
+                                <span id="notification-counter"></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="Profile" asp-action="Index" id="sidenav-profile"><img src="~/img/menu-icons/profile.png" alt="profile-icon" /></a>
+                        </li>
+                        <li>
+                            <a asp-controller="Home" asp-action="LogOut" id="sidenav-logout"><img src="~/img/menu-icons/logout.png" alt="logout-icon" /></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+@{
+    var width = "auto";
+    if (sideBar)
+    {
+        width = $"calc(100% - {(int)ViewData["LayoutSidebar"]}rem - 5.5rem);";
+    }
+}
+
+    <div class="content" style="width: @width">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification-tab" id="notification-tab">
+        <div class="task-detail-close"><i class="fas fa-times" onclick="ShowNotifications()"></i></div>
+        <div class="notification-list" id="notification-list">
+
+        </div>
+        <div>
+            <button type="submit" onclick="ReadAllNotifications()">Mark all as read</button>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/notification.js" asp-append-version="true"></script>
+
+    @RenderSection("Scripts", required: false)
+    <script>
+        var links = document.querySelectorAll(".sidenav a");
+    </script>
+</body>
+</html>

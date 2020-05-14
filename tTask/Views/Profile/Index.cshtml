@@ -1,0 +1,267 @@
+﻿
+@{
+    ViewData["Title"] = "Profile";
+    Layout = "_PageLayout";
+}
+
+@model tTask.ViewModels.ProfileViewModel
+@using tTask.ORM;
+@Html.ValidationSummary(true)
+
+<script>
+    $("#sidenav-profile").addClass("selected");
+</script>
+
+<div class="row">
+    <div class="col-8">
+        <div class="project-wrapper m-0 pt-3">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-12 col-lg-12 col-xl-3">
+                        <div class="p-4">
+                            <div class="card p-3 d-flex flex-row align-items-center flex-column">
+                                <p class="mb-5 mt-2 display-7 mr-auto">Change password:</p>
+                                <div class="form-container w-100 px-4">
+                                    <div class="text-danger customErr">@Html.ValidationMessage("CustomErr")</div>
+                                    <form asp-action="ChangePassword" asp-controller="Profile" method="post" class="d-flex flex-column">
+                                        <div class="form-group">
+                                            <label asp-for="ChangePassowrdForm.CurrentPassword" class="control-label"><small>Current password:</small></label>
+                                            <input asp-for="ChangePassowrdForm.CurrentPassword" class="form-control" type="password" />
+                                            <span asp-validation-for="ChangePassowrdForm.CurrentPassword" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label asp-for="ChangePassowrdForm.NewPassword" class="control-label"><small>New password:</small></label>
+                                            <input asp-for="ChangePassowrdForm.NewPassword" class="form-control" type="password" />
+                                            <span asp-validation-for="ChangePassowrdForm.NewPassword" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label asp-for="ChangePassowrdForm.ConfirmNewPassword" class="control-label"><small>Confirm new password:</small></label>
+                                            <input asp-for="ChangePassowrdForm.ConfirmNewPassword" class="form-control" type="password" />
+                                            <span asp-validation-for="ChangePassowrdForm.ConfirmNewPassword" class="text-danger"></span>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary ml-auto">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @if (Model.IdService != (int)Services.Basic)
+                    {
+                        <div class="col-12 col-lg-12 col-xl-3">
+
+                            <div class="user-settings p-4">
+                                <div class="card p-3 d-flex flex-column align-items-start">
+                                    <p class="mb-5 mt-2 display-7 mr-auto">Settings:</p>
+                                    <div class="card-body pb-0 d-flex flex-column w-100 mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <p class="my-0">Notifications</p>
+                                            <label class="switch my-0 ml-auto">
+                                                @if (Model.User.UserSettings.Notifications == "0")
+                                                {
+                                                    <input type="checkbox" onchange="ChangeSettings(this, 'notifications')">
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" onchange="ChangeSettings(this, 'notifications')" checked>
+                                                }
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+
+                                        <div class="d-flex align-items-center mt-4">
+                                            <p class="my-0">Task colorization</p>
+                                            <label class="switch my-0 ml-auto">
+                                                @if (Model.User.UserSettings.Coloring == "0")
+                                                {
+                                                    <input type="checkbox" onchange="ChangeSettings(this, 'coloring')">
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" onchange="ChangeSettings(this, 'coloring')" checked>
+                                                }
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+
+                                        <div class="d-flex align-items-center mt-4">
+                                            <p class="my-0">Viewed projects</p>
+                                            <label class="switch my-0 ml-auto">
+                                                @if (Model.User.UserSettings.CustomizeView == "0")
+                                                {
+                                                    <input type="checkbox" onchange="ChangeSettings(this, 'custom')">
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" onchange="ChangeSettings(this, 'custom')" checked>
+                                                }
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                            }
+                        <div class="col-12 col-lg-12 col-xl-3">
+                            <div class="add-photo p-4">
+                                <div class="card p-3 d-flex flex-column mb-4">
+                                    <p class="mb-5 mt-2 display-7 mr-auto">Change profile photo:</p>
+                                    <div class="card-body pb-0 pl-0 d-flex w-100">
+                                        <form asp-action="AddPhoto" class="d-flex flex-row w-100" asp-controller="Profile" method="post" enctype="multipart/form-data">
+                                            <div class="form-group w-100 flex-fill mb-0">
+                                                <label class="w-100 mb-0" for="img"><span class="btn btn-outline-secondary w-100" id="upload-img-label"><i class="fas fa-upload"></i> Choose a file...</span></label>
+                                                <input type="file" id="img" name="img" accept="image/*" required />
+                                            </div>
+                                            <button class="btn btn-primary ml-2" type="submit">Submit</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+    @if (User.IsInRole(nameof(Roles.DomainAdmin)))
+    {
+        <div class="col-4">
+            <div class="project-wrapper m-0 pt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="p-4">
+                            <div class="current-service">
+                                <p class="display-7">Actual plan:</p>
+                                <div class="panel p-3">
+                                    <ul class="list-unstyled plan-list">
+                                        <li>
+                                            <p class="my-0 mr-auto">Your current plan is: <strong class="mx-3">@Model.ServiceTenantOrder.IdServiceNavigation.Name</strong></p>
+                                        </li>
+                                        <li>
+                                            @{ var paymentExpires = @Model.ServiceTenantOrder.IdPaymentNavigation.Paid.Value.AddDays(30);}
+                                            <p class="my-0 mr-auto">Subscription validity: <strong class="mx-3"> @paymentExpires</strong></p>
+                                        </li>
+                                        <li>
+                                            <p class="my-0 mr-auto">Last payment: <strong class="mx-3">@Model.ServiceTenantOrder.OrderDate.Date.ToString("dd/MM/yyyy")</strong></p>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="buttons d-flex align-items-center justify-content-end p-4">
+                            <button class="btn btn-outline-secondary btn-lg" onclick="ViewPayment('@Model.ServiceTenantOrder.IdServiceNavigation.Name', @Model.ServiceTenantOrder.IdServiceNavigation.Price, @Model.ServiceTenantOrder.IdService)">Payment</button>
+                            <button class="btn btn-primary btn-lg ml-3" onclick="ViewChangeService()">Plan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+
+<div class="dialog-change-service dialog" id="dialog-change-service">
+    <div class="dialogbox-change-service dialogbox p-4">
+        <div class="dialog-close d-flex w-100 align-items-center justify-content-end"><i class="fas fa-times" onclick="CloseDialogChangeService()"></i></div>
+        <div class="change-service flex">
+            <div class="card-container p-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="change-service-box d-flex flex-column h-100">
+                            <p class="display-5 text-primary mb-2 mt-3">@Model.Basic.Name</p>
+                            <p class="lead mb-0">Price: <strong>FREE</strong></p>
+                            <hr class="w-100 mb-0" />
+                            <div class="change-service-list">
+                                <ul class="text-secondary">
+                                    <li>Only 5 users</li>
+                                    <li>Only 1 project</li>
+                                    <li>Only 5 comments per task</li>
+                                    <li>Unlimited tasks</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-auto" onclick="CheckServiceChange(1, @Model.ServiceTenantOrder.IdService)">Select plan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-container p-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="change-service-box">
+                            <p class="display-5 text-primary mb-2 mt-3">@Model.Pro.Name</p>
+                            <p class="lead mb-0">Price: <strong>@Model.Pro.Price Kč/month</strong></p>
+                            <hr class="mb-0"/>
+                            <div class="change-service-list">
+                                <ul class="text-secondary">
+                                    <li>Up to 10 users</li>
+                                    <li>Up to 5 projects</li>
+                                    <li>Up to 10 comments per task</li>
+                                    <li>Unlimited tasks</li>
+                                    <li>Customize view data</li>
+                                    <li>Task prioritization</li>
+                                    <li>Notification system</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="CheckServiceChange(2, @Model.ServiceTenantOrder.IdService)">Select plan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-container p-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="change-service-box">
+                            <p class="display-5 text-primary mb-2 mt-3">@Model.Business.Name</p>
+                            <p class="lead mb-0">Price: <strong>@Model.Business.Price Kč/month</strong></p>
+                            <hr class="mb-0"/>
+                            <div class="change-service-list">
+                                <ul class="text-secondary">
+                                    <li>Unlimited users</li>
+                                    <li>Unlimited projects</li>
+                                    <li>Unlimited comments per task</li>
+                                    <li>Unlimited tasks</li>
+                                    <li>Customize view data</li>
+                                    <li>Task prioritization</li>
+                                    <li>Notification system</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="CheckServiceChange(3, @Model.ServiceTenantOrder.IdService)">Select plan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-alert dialog" id="dialog-alert">
+    <div class="dialogbox-alert dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Alert</h3>
+        </div>
+        <hr class="my-3" />
+        <div id="alert-text"></div>
+        <button class="btn btn-primary d-flex ml-auto" type="submit" onclick="CloseDialogAlert()">OK</button>
+    </div>
+</div>
+
+<div class="dialog-payment dialog" id="dialog-payment">
+    <div class="dialogbox-payment dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Payment</h3>
+            <i class="fas fa-times ml-auto mb-auto" onclick="CloseDialogPayment()"></i>
+        </div>
+        <hr class="my-3" />
+        <div>Service: <span id="payment-name"></span></div>
+        <div>Price: <span id="payment-price"></span> kč</div>
+        <form asp-controller="Service" asp-action="Pay" method="post">
+            <input type="hidden" name="idService" id="payment-id-service" value="" />
+            <button type="submit" class="btn btn-primary d-flex ml-auto">Pay</button>
+        </form>
+    </div>
+</div>
+
+
+

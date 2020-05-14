@@ -1,0 +1,11 @@
+﻿@model tTask.ORM.DTO.User
+    <div class="profile-wrapper d-flex align-items-center  justify-content-center position-relative w-100">
+        @if (Model != null && !string.IsNullOrWhiteSpace(Model.Photopath))
+        {
+            <img class="img-fluid user-image" src="@Model.Photopath" alt="profile-icon" />
+        }
+        else
+        {
+            <img class="img-fluid" src="~/img/menu-icons/empty_profile.png" alt="profile-icon" />
+        }
+    </div>

@@ -1,0 +1,109 @@
+﻿
+@{
+    ViewData["Title"] = "Notifications";
+    Layout = "_PageLayout";
+}
+@model tTask.ViewModels.NotificationViewModel
+
+<div class="row">
+    <div class="col-12">
+        <div class="project-wrapper pt-3 mx-0 px-5 py-4">
+            <p class="display-7">Project requests</p>
+            <div class="stripe-wrapper @(!Model.ProjectRequests.Any() ? "show" : "") p-4 py-5 d-flex">
+                @if (!Model.ProjectRequests.Any())
+                {
+                    <p class="lead d-flex align-items-center my-0 mx-auto">
+                        No project invitation available
+                    </p>
+                }
+                else
+                {
+                    <div class="requests-list w-100">
+                        <ul class="list-unstyled">
+                            @foreach (var p in Model.ProjectRequests)
+                            {
+                                <li>
+                                    <div class="alert alert-secondary d-flex align-items-center" role="alert">
+                                        <strong>@p.IdProjectNavigation.Name</strong>
+
+                                        <div class="btn-request-wrapper ml-auto">
+                                            <button class="btn btn-success" onclick="ProjectRequest(@p.IdProject, 'confirm')">
+                                                <i class="far fa-check-circle confirm"></i>
+                                            </button>
+                                            <button class="btn btn-danger" onclick="ProjectRequest(@p.IdProject, 'deny')">
+                                                <i class="far fa-times-circle deny"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (Model.NotificationSetting)
+    {
+        <div class="col-12">
+            <div class="project-wrapper pt-3 mx-0 px-5 py-4">
+                <div class="not-header d-flex flex-row align-items-center mb-3">
+                    <p class="display-7 my-0">Notifications</p>
+
+                    <div class="notifications-btns ml-auto">
+                        <button id="not-btn-read" class="btn btn-outline-primary" onclick="ShowRead()">Show read</button>
+                        <button id="not-btn-unread" class="btn btn-outline-primary notifications-btn-active" onclick="ShowUnread()">Show unread</button>
+                        @if (Model.UnreadNotifications.Any())
+                        {
+                            <button class="btn btn-outline-primary" onclick="ReadAllNotifications()">Mark all as read</button>
+                        }
+                    </div>
+
+                </div>
+
+                <div class="stripe-wrapper p-4 d-flex">
+                    <div class="notifications-list w-100">
+                        <div id="notifications-read">
+                            <ul class="list-group">
+                                @foreach (var n in Model.ReadNotifications)
+                                {
+                                    <li class="list-group-item">
+                                        <div class="list-group-item-content">
+                                            <p>@n.Text</p>
+                                            <p class="small text-secondary">@n.Created</p>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <div id="notifications-unread">
+                            @if (!Model.UnreadNotifications.Any())
+                            {
+                                <div class="stripe-wrapper show p-4 py-5 d-flex" style="margin-left: -1.5rem;
+                                      margin-right: -1.5rem;">
+
+                                    <p class="lead d-flex align-items-center my-0 mx-auto">
+                                        No unread notifications available
+                                    </p>
+                                </div>
+                            }
+                            <ul class="list-group">
+                                @foreach (var n in Model.UnreadNotifications)
+                                {
+                                    <li class="list-group-item" onclick="ReadNotification(@n.IdNotification)">
+                                        <div class="list-group-item-content">
+                                            <p>@n.Text</p>
+                                            <p class="small text-secondary">@n.Created</p>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

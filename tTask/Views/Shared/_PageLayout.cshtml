@@ -1,0 +1,11 @@
+﻿@model BasePageViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "_PageLayout";
+
+}
+
+@await Component.InvokeAsync("PageHeader", new {model = @Model})
+
+@RenderBody()
+

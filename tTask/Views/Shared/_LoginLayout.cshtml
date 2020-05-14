@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - tTask</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/login.css" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+</head>
+<body>
+<div class="wrapper w-100">
+    <div class="d-flex align-items-center justify-content-center flex-column w-100">
+        <div class="logo-title d-flex justify-content-center"><img src="~/img/ttask.png" alt="logo title"/><span>tTask</span></div>
+        <div class="login-box">
+            @RenderBody()
+        </div>
+        <footer class="text-center">
+            @DateTime.Now.Year @@ all rights reserved. <b>Author - Radek Novák</b>
+            <div>Part of the icons in application made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+        </footer>
+    </div>
+</div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/login.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

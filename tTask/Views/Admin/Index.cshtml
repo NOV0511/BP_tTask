@@ -1,0 +1,125 @@
+﻿
+@{
+    ViewData["Title"] = "Admin";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+@model tTask.ViewModels.AdminViewModel
+@using  tTask.ORM;
+
+
+<div class="header">
+    <h1>All Tenants</h1>
+    <a asp-controller="Home" asp-action="LogOut"><i class="fas fa-sign-out-alt fa-2x"></i></a>
+</div>
+
+<div class="tenants">
+    <div class="tenant-item description">
+        <div class="tenant-name">
+            Name
+        </div>
+        <div class="tenant-domain">
+            Domain
+        </div>
+        <div class="tenant-service">
+            Service
+        </div>
+        <div class="tenant-payment">
+            Payment expires
+        </div>
+
+        <div class="tenant-btn disable">
+            Disable tenant till next payment
+        </div>
+        <div class="tenant-btn change">
+            Change service and add free days
+        </div>
+        <div class="tenant-btn add">
+            Add free days
+        </div>
+    </div>
+    @foreach (var tenant in Model.Tenants)
+    {
+        <div class="tenant-item">
+            <div class="tenant-name">
+                @tenant.Name
+            </div>
+            <div class="tenant-domain">
+                @tenant.Domain
+            </div>
+            <div class="tenant-service">
+                @tenant.ServiceOrder.First().IdServiceNavigation.Name
+            </div>
+            <div class="tenant-payment">
+                @if (tenant.ServiceOrder.First().IdPaymentNavigation.Paid.HasValue && tenant.ServiceOrder.First().IdService != (int)Services.Basic)
+                {
+                    @tenant.ServiceOrder.First().IdPaymentNavigation.Paid.Value.AddDays(30)
+                }
+            </div>
+            <div class="tenant-btn disable">
+                <button onclick="Disable(@tenant.IdTenant, @tenant.ServiceOrder.First().IdService)">Disable</button>
+            </div>
+            <div class="tenant-btn change">
+                <button onclick="ViewChange(@tenant.IdTenant, @tenant.ServiceOrder.First().IdService)">Change service</button>
+            </div>
+            <div class="tenant-btn add">
+                <button onclick="ViewAdd(@tenant.IdTenant, @tenant.ServiceOrder.First().IdService)">Add days</button>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="dialog-alert dialog" id="dialog-alert">
+    <div class="dialogbox-alert dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Alert</h3>
+        </div>
+        <hr class="my-3" />
+        <div id="alert-text"></div>
+        <button class="btn btn-primary d-flex ml-auto" type="submit" onclick="CloseDialogAlert()">OK</button>
+    </div>
+</div>
+
+<div class="dialog-change dialog" id="dialog-change">
+    <div class="dialogbox-change dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Change tenant service to higher and add free days</h3>
+            <i class="fas fa-times ml-auto mb-auto" onclick="CloseChange()"></i>
+        </div>
+        <hr class="my-3" />
+        <form asp-controller="Admin" asp-action="ChangeService" method="post">
+            <div class="form-group">
+                <label for="idService">Choose service:</label>
+                <select id="change-service" name="idService" required class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label for="addDays">Add days:</label>
+                <input name="addDays" type="number" required  class="form-control"/>
+            </div>
+
+            <input id="change-id-tenant" name="idTenant" type="hidden" value="" />
+            <br /><button class="btn btn-primary d-flex ml-auto"  type="submit">Change</button>
+        </form>
+    </div>
+</div>
+
+<div class="dialog-add dialog" id="dialog-add">
+    <div class="dialogbox-add dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Add free days</h3>
+            <i class="fas fa-times ml-auto mb-auto" onclick="CloseAdd()"></i>
+        </div>
+        <hr class="my-3" />
+        <form asp-controller="Admin" asp-action="AddDays" method="post">
+            <div class="form-group">
+                <label for="addDays">Add days:</label>
+                <input name="addDays" type="number" required class="form-control" />
+            </div>
+
+            <input id="add-id-tenant" name="idTenant" type="hidden" value="" />
+            <br /><button class="btn btn-primary d-flex ml-auto"  type="submit">Add</button>
+        </form>
+    </div>
+</div>
+
+
+

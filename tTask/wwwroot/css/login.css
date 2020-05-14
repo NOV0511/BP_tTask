@@ -1,0 +1,131 @@
+﻿body {
+    background-color: #9fa8da;
+    width: 100%;
+    height: 100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.logo-title {
+    color: #313964;
+    font-weight: 600;
+    font-size: 2.5rem;
+    margin-bottom: 6rem;
+}
+
+footer {
+    color: #5b6495;
+    font-weight: 500;
+    font-size: .85rem;
+    margin-top: 1.25rem;
+}
+
+.login-box {
+    min-width: 30rem !important;
+    max-width: 38rem;
+    width: 25%;
+    background-color: #fff;
+    border-radius: 5px;
+    -webkit-box-shadow: 18px 26px 38px -15px rgba(87,100,166,0.6);
+    -moz-box-shadow: 18px 26px 38px -15px rgba(87,100,166,0.6);
+    box-shadow: 18px 26px 38px -15px rgba(87,100,166,0.6);
+}
+
+.top-buttons{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1vh;
+}
+
+.vertical-line {
+    border-left: 1px solid #000;
+    height: 25pt;
+}
+
+.sign-in, .sign-up {
+    width: 45%;
+    text-align: center;
+    font-size: 17pt;
+    cursor: pointer;
+}
+
+.active {
+    font-size: 20pt;
+    color: #4a5bb9;
+}
+
+
+
+.sign-form {
+    display:none;
+}
+
+.selected {
+    display: block;
+}
+
+
+label:not(.control-label) {
+    float: left;
+    display: none;
+    order: 1;
+    position: absolute;
+    font-size: 10pt;
+    margin-top: 1vh;
+}
+
+input:not(:placeholder-shown) + label, input:focus + label {
+    display: block;
+}
+
+.form-input {
+    display: flex;
+    flex-direction: column;
+    padding: 0 10%;
+}
+
+input{
+    order: 2;
+    border: 1px solid #000;
+    border-radius: 3px;
+    line-height: 20pt;
+}
+
+.btn-primary {
+    background-color: #3f51b5 !important;
+    outline: none !important;
+    border: none !important;
+    font-size: 17pt;
+    font-weight: 500;
+}
+
+button:not(.form-login) {
+    background-color: #3f51b5;
+    color: #fff;
+    font-weight:500;
+    border:none;
+    border-radius:5px;
+    font-size:17pt;
+    padding: 0 10px 5px 10px;
+    margin:2vh 10px 10px 0;
+    display:block;
+    float:right;
+}
+
+.new-tenant-only {
+    display: none;
+}
+
+.msg-box{
+    margin: 30px;
+}
+
+#redirect-home {
+    font-weight:500;
+    cursor:pointer;
+}
+
+

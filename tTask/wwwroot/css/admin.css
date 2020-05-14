@@ -1,0 +1,106 @@
+﻿.tenant-item{
+    width: 100%;
+    display: flex;
+}
+
+.tenant-payment, .tenant-name, .tenant-domain {
+    width: 20%;
+}
+
+.tenant-item.description{
+    border-bottom: 1px solid #424242;
+}
+
+.tenant-item:nth-child(even) {
+    background-color: #eceef8;
+}
+
+.tenants{
+    padding: 1vh 2.5%;
+}
+
+.tenant-btn, .tenant-service {
+    width: 10%;
+}
+
+button {
+    background-color: #3f51b5;
+    color: #fff;
+    font-weight: 500;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    margin: 0.5vh 0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 1vh 2.5%;
+}
+
+a{
+    color: #424242;
+    text-decoration:none;
+}
+
+
+
+.dialog {
+    z-index: 999;
+    background-color: #000d;
+    display: none;
+    height: 100vh;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    user-select: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.dialogbox {
+    background-color: #fff;
+    width: 20%;
+    min-width: 300px;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+    .dialogbox form {
+        min-height: inherit;
+    }
+
+    .dialogbox input {
+        width: 100%;
+    }
+
+    .dialogbox textarea {
+        width: 100%;
+    }
+
+    .dialogbox select {
+        width: 100%;
+        min-height: 30px;
+    }
+
+
+.dialog-close {
+    float: right;
+    font-size: 2em;
+    color: #3f51b5;
+    line-height: 1;
+}
+
+.dialogbox button {
+    background-color: #3f51b5;
+    color: #fff;
+    font-weight: 500;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.5em;
+    float: right;
+    margin-top: 1vh;
+}

@@ -1,0 +1,174 @@
+﻿@{
+    ViewData["Title"] = "Home";
+    Layout = "_PageLayout";
+}
+@model tTask.ViewModels.HomePageViewModel
+@using tTask.ORM;
+@using tTask.ORM.DTO;
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+
+<script>
+    $("#sidenav-home").addClass("selected");
+</script>
+
+
+
+<div class="row">
+    <div class="project-wrapper pt-3">
+        <div class="col-12">
+            <div class="px-3 pb-2">
+                @if (User.IsInRole(nameof(Roles.DomainAdmin)) || User.IsInRole(nameof(Roles.Manager)))
+                {
+                    <button class="btn btn-primary" onclick="AddNewProject()">+ Add project</button>
+                    <hr />
+                }
+            </div>
+        </div>
+        <div class="col">
+            <div class="stripe-wrapper @(Model.ExistsProject ? "" : "show") p-5 d-flex">
+                @if (!Model.ExistsProject)
+                {
+                <p class="lead d-flex align-items-center my-0 mx-auto">
+                    No project here yet
+                    @if (User.IsInRole(nameof(Roles.DomainAdmin)) || User.IsInRole(nameof(Roles.Manager)))
+                    {
+                    <button class="ml-3 btn btn-outline-primary" onclick="AddNewProject()">Start by creating your first project</button>
+                    }
+                    
+                </p>
+                }
+                else
+                {
+            <div class="container-fluid">
+                <div class="row">
+                    @foreach (var p in Model.User.UserProject)
+                    {
+                        if (p.IdRole != (int)Roles.ProjectRequest)
+                        {
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="buttons-card-container d-flex justify-content-end">
+                                        @if (Model.IdService != (int)Services.Basic && Model.SettingsCustom)
+                                        {
+                                            @if (p.Active == "1")
+                                            {
+                                                <button onclick="ChangeProjectActiveState(this, @p.IdUser, @p.IdProject, @p.IdRole, '0')" class="btn btn-outline-secondary"><i class="far fa-eye"></i></button>
+                                            }
+                                            else
+                                            {
+                                                <button onclick="ChangeProjectActiveState(this, @p.IdUser, @p.IdProject, @p.IdRole, '1')" class="btn btn-outline-secondary"><i class="far fa-eye-slash"></i></button>
+                                            }
+                                        }
+                                        @if (p.IdRole == (int)Roles.ProjectLeader)
+                                        {
+
+                                            <button class="btn btn-outline-secondary ml-1" onclick="ModifyProject(@p.IdProject, '@p.IdProjectNavigation.Name', '@p.IdProjectNavigation.Description')"><i class="fas fa-cog"></i></button>
+                                            <button class="btn btn-outline-secondary ml-1" id="delete-project" data-project-id="@p.IdProject" onclick="NewDialogDeleteProject(@p.IdProject)">
+                                                <i class="far fa-trash-alt"></i>
+                                            </button>
+
+                                        }
+                                    </div>
+                                    <a href="@Url.Action("Index", "Project", new {idProject = p.IdProject})">
+                                        <h3 class="card-title text-dark mt-2">@p.IdProjectNavigation.Name</h3>
+                                    </a>
+                                    <p class="card-text">@p.IdProjectNavigation.Description</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        }
+                    }
+                </div>
+            </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="dialog-new-project dialog" id="dialog-new-project">
+    <div class="dialogbox-new-project dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h4>Add new project</h4>
+            <i class="fas fa-times ml-auto mb-auto" onclick="CloseDialogNewProject()"></i>
+        </div>
+        <hr class="my-3"/>
+        <div class="form-group">
+            <label for="projectName">Name<span class="text-danger">*</span> :</label>
+            <input class="form-control" id="add-new-project-name" name="projectName" type="text" placeholder="Enter project name..." required/>
+        </div>
+        <div class="form-group">
+            <label for="projectDescription">Description:</label>
+            <textarea class="form-control" id="add-new-project-description" name="projectDescription" type="text" placeholder="Enter project description (max 300 letters)" maxlength="300" rows="3"></textarea>
+        </div>
+        <button class="btn btn-primary d-flex ml-auto" id="add-new-project-btn" type="submit">+ Add project</button>
+    </div>
+</div>
+
+<div class="dialog-modify-project dialog" id="dialog-modify-project">
+    <div class="dialogbox-new-project dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Modify project</h3>
+            <i class="fas fa-times ml-auto mb-auto" onclick="CloseDialogModifyProject()"></i>
+        </div>
+        <hr class="my-3" />
+
+        <input id="modify-project-id" name="projectId" type="hidden" />
+
+        <div class="form-group">
+            <label for="projectName">Name<span class="text-danger">*</span> :</label>
+            <input class="form-control" id="modify-project-name" name="projectName" type="text" required />
+        </div>
+
+        <div class="form-group">
+            <label for="projectDescription">Description:</label>
+            <textarea class="form-control" id="modify-project-description" name="projectDescription" type="text" maxlength="300" rows="3"> </textarea>
+        </div>
+        <button class="btn btn-primary d-flex ml-auto" id="modify-project-btn" type="submit">Update</button>
+    </div>
+    </div>
+
+
+<div class="dialog-alert dialog" id="dialog-alert">
+    <div class="dialogbox-alert dialogbox p-4">
+        <div class="dialog-header d-flex flex-row align-items-center">
+            <h3>Alert</h3>
+        </div>
+        <hr class="my-3" />
+        <div id="alert-text"></div>
+        <button class="btn btn-primary d-flex ml-auto" type="submit" onclick="CloseDialogAlert()">OK</button>
+    </div>
+</div>
+
+
+<script>
+    document.querySelector("#delete-project").addEventListener("click", function () {
+        var projectId = this.getAttribute("data-project-id");
+        if (projectId) {
+            document.querySelector("input[name='idProject']").value = projectId;
+            document.querySelector("#dialog-delete-project").style.display = "flex";
+        }
+    });
+</script>
+
+
+<div class="dialog-delete-project dialog" id="dialog-delete-project">
+    <div class="dialogbox-alert dialogbox p-4">
+        <h3>Alert</h3>
+        <div id="alert-text">Do you really want to delete this project?</div>
+        <div class="flex dialog-delete-project-btns" id="delete-project-content">
+            <form asp-action="DeleteProject" asp-controller="Project" method="post">
+                <input type="hidden" id="delete-project-id" name="idProject" />
+                <div class="button-group d-flex flex-row mt-4">
+                    <button type="button" onclick="CloseDialogDeleteProject()" class="btn btn-outline-secondary mr-0">Cancel</button>
+                    <button id="delete-project-btn" type="submit" class="btn btn-primary ml-1">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

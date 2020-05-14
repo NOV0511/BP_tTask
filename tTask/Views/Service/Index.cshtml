@@ -1,0 +1,123 @@
+﻿
+@{
+    ViewData["Title"] = "Service";
+}
+@model tTask.ViewModels.ServiceViewModel
+@using tTask.ORM;
+
+<script>
+    $("#sidenav-service").addClass("selected");
+</script>
+<div class="service-content">
+    <div>
+        <h1>Manage your services</h1>
+
+        <div class="service">
+            <b>Service:</b> 
+            <div>@Model.ServiceTenantOrder.IdServiceNavigation.Name</div>
+            <div><span class="service-btn" onclick="ViewChangeService()">Change</span></div>
+        </div>
+
+        @{ var paymentExpires = @Model.ServiceTenantOrder.IdPaymentNavigation.Paid.Value.AddDays(30);}
+        @if (Model.ServiceTenantOrder.IdService != (int)Services.Basic)
+        {
+            <div class="service">
+                <b>Payment:</b>
+                <div>Last payment: @Model.ServiceTenantOrder.OrderDate.Date.ToString("dd/MM/yyyy")</div>
+                <div>Payment expires: @paymentExpires</div>
+                <div><span class="service-btn" onclick="ViewPayment('@Model.ServiceTenantOrder.IdServiceNavigation.Name', @Model.ServiceTenantOrder.IdServiceNavigation.Price, @Model.ServiceTenantOrder.IdService)">Payment</span></div>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+<div class="dialog-change-service dialog" id="dialog-change-service">
+    <div class="dialogbox-change-service dialogbox">
+        <div class="dialog-close"><i class="fas fa-times" onclick="CloseDialogChangeService()"></i></div>
+        <div class="change-service flex">
+
+            <div class="change-service-box">
+                <div class="change-service-name">
+                    @Model.Basic.Name
+                    <br />Price: FREE
+                </div>
+                <div class="change-service-list">
+                    <ul>
+                        <li class="red">Only 5 users</li>
+                        <li class="red">Only 1 project</li>
+                        <li class="red">Only 5 comments per task</li>
+                        <li class="green">Unlimited tasks</li>
+                    </ul>
+                </div>
+                <div class="change-service-btn">
+                    <span class="service-btn" onclick="CheckServiceChange(1, @Model.ServiceTenantOrder.IdService)">Choose</span>
+                </div>
+            </div>
+
+            <div class="change-service-box">
+                <div class="change-service-name">
+                    @Model.Pro.Name
+                    <br />Price: @Model.Pro.Price kč/month
+                </div>
+                <div class="change-service-list">
+                    <ul>
+                        <li class="orange">Up to 10 users</li>
+                        <li class="orange">Up to 5 projects</li>
+                        <li class="orange">Up to 10 comments per task</li>
+                        <li class="green">Unlimited tasks</li>
+                        <li class="green">Customize view data</li>
+                        <li class="green">Task priorization</li>
+                        <li class="green">Notification system</li>
+                    </ul>
+                </div>
+                <div class="change-service-btn">
+                    <span class="service-btn" onclick="CheckServiceChange(2, @Model.ServiceTenantOrder.IdService)">Choose</span>
+                </div>
+            </div>
+
+            <div class="change-service-box">
+                <div class="change-service-name">
+                    @Model.Business.Name
+                    <br />Price: @Model.Business.Price kč/month
+                </div>
+                <div class="change-service-list">
+                    <ul>
+                        <li class="green">Unlimited users</li>
+                        <li class="green">Unlimited projects</li>
+                        <li class="green">Unlimited comments per task</li>
+                        <li class="green">Unlimited tasks</li>
+                        <li class="green">Customize view data</li>
+                        <li class="green">Task priorization</li>
+                        <li class="green">Notification system</li>
+                    </ul>
+                </div>
+                <div class="change-service-btn">
+                    <span class="service-btn" onclick="CheckServiceChange(3, @Model.ServiceTenantOrder.IdService)">Choose</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-alert dialog" id="dialog-alert">
+    <div class="dialogbox-alert dialogbox">
+        <h3>Alert</h3>
+        <div id="alert-text"></div>
+        <button type="submit" onclick="CloseDialogAlert()">OK</button>
+    </div>
+</div>
+
+<div class="dialog-payment dialog" id="dialog-payment">
+    <div class="dialogbox-payment dialogbox">
+        <div class="dialog-close"><i class="fas fa-times" onclick="CloseDialogPayment()"></i></div>
+        <h3>Payment</h3>
+        <div>Service: <span id="payment-name"></span></div>
+        <div>Price: <span id="payment-price"></span> kč</div>
+        <form asp-controller="Service" asp-action="Pay" method="post">
+            <input type="hidden" name="idService" id="payment-id-service" value="" />
+            <button type="submit">Pay</button>
+        </form>
+    </div>
+</div>
